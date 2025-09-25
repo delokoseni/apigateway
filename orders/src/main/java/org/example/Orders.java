@@ -5,9 +5,10 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class Orders {
@@ -37,6 +38,33 @@ public class Orders {
         try (FileWriter writer = new FileWriter(FILE_NAME, true)) {
             String line = String.format("Заказ №%d | %s | Статус: Выполняется%n", ORDER_NUMBER++, order);
             writer.write(line);
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void editOrderStatus(int orderNumber) {
+        try {
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("Заказ №" + orderNumber + " ")) {
+                        int idx = line.indexOf("Статус:");
+                        if (idx != -1) {
+                            line = line.substring(0, idx) + "Статус: " + "Выполнен";
+                        }
+                    }
+                    lines.add(line);
+                }
+            }
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+                for (String l : lines) {
+                    writer.write(l);
+                    writer.newLine();
+                }
+            }
+            System.out.println("Статус заказа №" + orderNumber + " изменён на '" + "Выполнен" + "'");
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
         }
