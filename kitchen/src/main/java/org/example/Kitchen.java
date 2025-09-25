@@ -8,6 +8,7 @@ import com.rabbitmq.client.DeliverCallback;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Kitchen {
 
@@ -25,6 +26,20 @@ public class Kitchen {
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
             System.out.println(" [x] Received '" + message + "'");
+            int seconds = ThreadLocalRandom.current().nextInt(5, 11);
+            try {
+                Thread.sleep(seconds * 1000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            String[] parts = message.split("\\|", 2);
+            int orderNumber = Integer.parseInt(parts[0]);
+            String response = orderNumber + "|Выполнен";
+            channel.basicPublish("",
+                    KITCHEN_QUEUE_NAME,
+                    null,
+                    response.getBytes(StandardCharsets.UTF_8));
+            System.out.println(" [x] Sent ready order: '" + response + "'");
         };
         channel.basicConsume(KITCHEN_QUEUE_NAME, true, deliverCallback, consumerTag -> { });
     }

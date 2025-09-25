@@ -39,6 +39,17 @@ public class Orders {
             System.out.println(" [x] Sent '" + kitchenMessage + "'");
         };
         channel.basicConsume(ORDER_QUEUE_NAME, true, deliverCallback, consumerTag -> { });
+
+        DeliverCallback kitchenCallback = (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
+            System.out.println(" [x] Received kitchen response'" + message + "'");
+            String[] parts = message.split("\\|");
+            if (parts.length >= 2) {
+                int orderNumber = Integer.parseInt(parts[0]);
+                editOrderStatus(orderNumber);
+            }
+        };
+        channel.basicConsume(KITCHEN_QUEUE_NAME, true, kitchenCallback, consumerTag -> { });
     }
 
     private static int saveToDB(String order) {
