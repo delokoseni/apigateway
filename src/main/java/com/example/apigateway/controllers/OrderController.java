@@ -19,7 +19,7 @@ public class OrderController {
     public ResponseEntity<String> order(@RequestBody String order) {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setHost("rabbitmq");
             try (Connection connection = factory.newConnection();
                  Channel channel = connection.createChannel()) {
                 channel.queueDeclare(ORDER_QUEUE_NAME, true, false, false, null);

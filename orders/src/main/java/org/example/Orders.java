@@ -20,7 +20,7 @@ public class Orders {
     public static void main(String[] args) throws IOException, TimeoutException {
         Files.deleteIfExists(Paths.get(FILE_NAME));
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost("rabbitmq");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
